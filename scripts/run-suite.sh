@@ -5,7 +5,7 @@ set -euo pipefail
 PHP_72_IMAGE='docker.io/library/php:7.2.34-cli@sha256:42ffbc0798e4449bbd1e14fc4dcb87774aa1ad1900a09ef6a965bc0880aa2161'
 PHP_74_IMAGE='docker.io/library/php:7.4.33-cli@sha256:620a6b9f4d4feef2210026172570465e9d0c1de79766418d3affd09190a7fda5'
 PHP_80_IMAGE='docker.io/library/php:8.0.30-cli@sha256:0569e384b9064c04dec55dc6e41be41b494a878dfbb6577a7d76bd50cfd5bc00'
-PHP_85_IMAGE='docker.io/library/php:8.5-cli'
+PHP_85_IMAGE='docker.io/library/php:8.5-cli@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3'
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RANDOM_SEED=20261008
