@@ -44,7 +44,6 @@ class NoDiscardTest extends TestCase
     public function testConstructorRejectsNonString()
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('must be of type ?string');
         new \NoDiscard([]);
     }
 

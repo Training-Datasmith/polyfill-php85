@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Digest-pinned PHP CLI images (amd64 manifest digests from Docker Hub).
 PHP_72_IMAGE='docker.io/library/php:7.2.34-cli@sha256:42ffbc0798e4449bbd1e14fc4dcb87774aa1ad1900a09ef6a965bc0880aa2161'
+PHP_74_IMAGE='docker.io/library/php:7.4.33-cli@sha256:620a6b9f4d4feef2210026172570465e9d0c1de79766418d3affd09190a7fda5'
 PHP_80_IMAGE='docker.io/library/php:8.0.30-cli@sha256:0569e384b9064c04dec55dc6e41be41b494a878dfbb6577a7d76bd50cfd5bc00'
 PHP_85_IMAGE='docker.io/library/php:8.5-cli'
 
@@ -61,12 +62,10 @@ run_phpunit() {
   "
 }
 
-echo '--- PHP 7.4 stubs74/NoDiscard.php lint (not in gate matrix) ---'
-${CONTAINER} run --rm -v "${ROOT}:/app:Z" docker.io/library/php:7.4.33-cli php -l /app/Resources/stubs74/NoDiscard.php
+echo '--- PHP 7.4 stubs74/NoDiscard.php lint ---'
+${CONTAINER} run --rm -v "${ROOT}:/app:Z" "${PHP_74_IMAGE}" php -l /app/Resources/stubs74/NoDiscard.php
 
 install_vendor "${PHP_72_IMAGE}" 'php7.2'
-install_vendor "${PHP_80_IMAGE}" 'php8.0'
-
 for i in 1 2; do
   run_phpunit "${PHP_72_IMAGE}" "--testsuite default --colors=never" "php7.2 default run ${i}"
 done
@@ -74,6 +73,15 @@ for i in 1 2; do
   run_phpunit "${PHP_72_IMAGE}" "--testsuite default --order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php7.2 random run ${i}"
 done
 
+install_vendor "${PHP_74_IMAGE}" 'php7.4'
+for i in 1 2; do
+  run_phpunit "${PHP_74_IMAGE}" "--testsuite default --colors=never" "php7.4 default run ${i}"
+done
+for i in 1 2; do
+  run_phpunit "${PHP_74_IMAGE}" "--testsuite default --order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php7.4 random run ${i}"
+done
+
+install_vendor "${PHP_80_IMAGE}" 'php8.0'
 for i in 1 2; do
   run_phpunit "${PHP_80_IMAGE}" "--colors=never" "php8.0 default run ${i}"
 done
