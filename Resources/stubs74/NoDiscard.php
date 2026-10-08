@@ -9,15 +9,13 @@
  * file that was distributed with this source code.
  */
 
-if (!\class_exists('NoDiscard', false)) {
-    #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
-    final class NoDiscard
-    {
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
+final class NoDiscard
+{
     public ?string $message;
 
     public function __construct(?string $message = null)
     {
         $this->message = $message;
-    }
     }
 }

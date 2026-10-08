@@ -4,6 +4,7 @@ set -euo pipefail
 # Digest-pinned PHP CLI images (amd64 manifest digests from Docker Hub).
 PHP_72_IMAGE='docker.io/library/php:7.2.34-cli@sha256:42ffbc0798e4449bbd1e14fc4dcb87774aa1ad1900a09ef6a965bc0880aa2161'
 PHP_80_IMAGE='docker.io/library/php:8.0.30-cli@sha256:0569e384b9064c04dec55dc6e41be41b494a878dfbb6577a7d76bd50cfd5bc00'
+PHP_85_IMAGE='docker.io/library/php:8.5-cli'
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RANDOM_SEED=20261008
@@ -17,10 +18,9 @@ else
   exit 1
 fi
 
-run_in_container() {
+install_vendor() {
   local image="$1"
-  local phpunit_args="$2"
-  local label="$3"
+  local label="$2"
 
   ${CONTAINER} run --rm --network=host -v "${ROOT}:/app:Z" -w /app "${image}" bash -lc "
     set -euo pipefail
@@ -45,21 +45,47 @@ run_in_container() {
     php composer-setup.php --version=2.2.25 --install-dir=/usr/local/bin --filename=composer
     rm -f composer-setup.php composer-setup.sig
     composer update --no-interaction --prefer-dist
+    echo '--- vendor install ${label} ---'
+  "
+}
+
+run_phpunit() {
+  local image="$1"
+  local phpunit_args="$2"
+  local label="$3"
+
+  ${CONTAINER} run --rm -v "${ROOT}:/app:Z" -w /app "${image}" bash -lc "
+    set -euo pipefail
     echo '--- ${label} ---'
     vendor/bin/phpunit ${phpunit_args}
   "
 }
 
+echo '--- PHP 7.4 stubs74/NoDiscard.php lint (not in gate matrix) ---'
+${CONTAINER} run --rm -v "${ROOT}:/app:Z" docker.io/library/php:7.4.33-cli php -l /app/Resources/stubs74/NoDiscard.php
+
+install_vendor "${PHP_72_IMAGE}" 'php7.2'
+install_vendor "${PHP_80_IMAGE}" 'php8.0'
+
 for i in 1 2; do
-  run_in_container "${PHP_72_IMAGE}" "--testsuite default --colors=never" "php7.2 default run ${i}"
+  run_phpunit "${PHP_72_IMAGE}" "--testsuite default --colors=never" "php7.2 default run ${i}"
 done
 for i in 1 2; do
-  run_in_container "${PHP_72_IMAGE}" "--testsuite default --order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php7.2 random run ${i}"
+  run_phpunit "${PHP_72_IMAGE}" "--testsuite default --order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php7.2 random run ${i}"
 done
 
 for i in 1 2; do
-  run_in_container "${PHP_80_IMAGE}" "--colors=never" "php8.0 default run ${i}"
+  run_phpunit "${PHP_80_IMAGE}" "--colors=never" "php8.0 default run ${i}"
 done
 for i in 1 2; do
-  run_in_container "${PHP_80_IMAGE}" "--order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php8.0 random run ${i}"
+  run_phpunit "${PHP_80_IMAGE}" "--order-by=random --random-order-seed=${RANDOM_SEED} --colors=never" "php8.0 random run ${i}"
 done
+
+echo '--- php8.5 native class guard ---'
+${CONTAINER} run --rm -v "${ROOT}:/app:Z" -w /app "${PHP_85_IMAGE}" php -r "
+require 'vendor/autoload.php';
+if (!(new ReflectionClass('NoDiscard'))->isInternal()) { fwrite(STDERR, 'NoDiscard is not native'.PHP_EOL); exit(1); }
+if (!(new ReflectionClass('DelayedTargetValidation'))->isInternal()) { fwrite(STDERR, 'DelayedTargetValidation is not native'.PHP_EOL); exit(1); }
+if (!(new ReflectionFunction('array_first'))->isInternal()) { fwrite(STDERR, 'array_first is not native'.PHP_EOL); exit(1); }
+echo 'php8.5 native guard ok'.PHP_EOL;
+"

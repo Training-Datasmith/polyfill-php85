@@ -14,6 +14,7 @@ namespace Symfony\Polyfill\Php85\Tests\Php80\Fixtures;
 #[\DelayedTargetValidation]
 class DelayedTargetSample
 {
+    #[\DelayedTargetValidation]
     public const SAMPLE = 'x';
 
     #[\DelayedTargetValidation]

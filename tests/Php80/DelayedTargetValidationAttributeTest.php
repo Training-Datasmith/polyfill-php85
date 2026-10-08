@@ -61,9 +61,6 @@ class DelayedTargetValidationAttributeTest extends TestCase
         $this->assertInstanceOf(\DelayedTargetValidation::class, $attributes[0]->newInstance());
     }
 
-    /**
-     * @requires PHP >= 8.1
-     */
     public function testAppliedToClassConstant()
     {
         $attributes = (new ReflectionClass(DelayedTargetSample::class))->getReflectionConstant('SAMPLE')->getAttributes(\DelayedTargetValidation::class);

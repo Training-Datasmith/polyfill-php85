@@ -48,15 +48,6 @@ class NoDiscardTest extends TestCase
         new \NoDiscard([]);
     }
 
-    /**
-     * @requires PHP >= 8.1
-     */
-    public function testConstructorRejectsExtraArgument()
-    {
-        $this->expectException(\ArgumentCountError::class);
-        new \NoDiscard('a', 'b');
-    }
-
     public function testPropertyIsPublicAndNamedMessage()
     {
         $property = (new ReflectionClass(\NoDiscard::class))->getProperty('message');

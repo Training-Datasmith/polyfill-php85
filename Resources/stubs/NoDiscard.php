@@ -13,16 +13,40 @@ if (\PHP_VERSION_ID >= 80500) {
     return;
 }
 
-if (\PHP_VERSION_ID >= 80000) {
-    require_once __DIR__.'/../stubs74/NoDiscard.php';
-
-    return;
-}
-
 if (\PHP_VERSION_ID >= 70400) {
-    require_once __DIR__.'/../stubs74/NoDiscardTyped.php';
+    require_once __DIR__.'/../stubs74/NoDiscard.php';
+} else {
+    final class NoDiscard
+    {
+        public $message;
 
-    return;
+        public function __construct($message = null)
+        {
+            if (null === $message) {
+                $this->message = null;
+
+                return;
+            }
+
+            if (\is_string($message)) {
+                $this->message = $message;
+
+                return;
+            }
+
+            if (\is_int($message) || \is_float($message) || \is_bool($message)) {
+                $this->message = (string) $message;
+
+                return;
+            }
+
+            if (\is_object($message) && \method_exists($message, '__toString')) {
+                $this->message = (string) $message;
+
+                return;
+            }
+
+            throw new \TypeError('NoDiscard::__construct(): Argument #1 ($message) must be of type ?string');
+        }
+    }
 }
-
-require_once __DIR__.'/../stubs72/NoDiscard.php';

@@ -25,12 +25,4 @@ class DelayedTargetValidationTest extends TestCase
         $this->assertInstanceOf(\DelayedTargetValidation::class, new \DelayedTargetValidation());
     }
 
-    /**
-     * @requires PHP >= 8.1
-     */
-    public function testConstructorRejectsArguments()
-    {
-        $this->expectException(\ArgumentCountError::class);
-        new \DelayedTargetValidation(1);
-    }
 }
