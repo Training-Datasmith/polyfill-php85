@@ -30,3 +30,6 @@ if (!function_exists('array_first')) {
 if (!function_exists('array_last')) {
     function array_last(array $array) { return p\Php85::array_last($array); }
 }
+
+require __DIR__.'/Resources/stubs/NoDiscard.php';
+require __DIR__.'/Resources/stubs/DelayedTargetValidation.php';

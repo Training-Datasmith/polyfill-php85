@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-if (\PHP_VERSION_ID >= 80500) {
-    return;
+if (!\class_exists('NoDiscard', false)) {
+    final class NoDiscard
+    {
+    public ?string $message;
+
+    public function __construct(?string $message = null)
+    {
+        $this->message = $message;
+    }
+    }
 }
-
-if (\PHP_VERSION_ID >= 80000) {
-    require_once __DIR__.'/../stubs74/DelayedTargetValidation.php';
-
-    return;
-}
-
-require_once __DIR__.'/../stubs72/DelayedTargetValidation.php';
